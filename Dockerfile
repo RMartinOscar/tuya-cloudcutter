@@ -1,17 +1,13 @@
-FROM python:3.9.18-slim-bullseye AS base
+FROM python:3.9.18-slim-bullseye
+WORKDIR /src
 
-RUN apt-get -qq update && apt-get install -qy --no-install-recommends git hostapd rfkill dnsmasq build-essential libssl-dev iproute2 mosquitto
-
-FROM base AS python-deps
+RUN apt-get -qq update \
+    && apt-get install -qy --no-install-recommends \
+    git hostapd rfkill dnsmasq build-essential \
+    libssl-dev iproute2 mosquitto
 
 RUN pip install --upgrade pipenv
 
-COPY src/Pipfile /src/
-COPY src/Pipfile.lock /src/
-RUN cd /src && PIPENV_VENV_IN_PROJECT=1 pipenv install --deploy
+COPY src ./
 
-FROM python-deps AS cloudcutter
-
-COPY src /src
-
-WORKDIR /src
+RUN PIPENV_VENV_IN_PROJECT=1 pipenv install --deploy
